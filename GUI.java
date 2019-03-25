@@ -27,8 +27,9 @@ public class GUI {
 	
 	
 	void run() {
-		ramka =  new JFrame();
+		ramka =  new JFrame("komunikator 2.0");
 		ramka.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		ramka.addWindowListener( new exitListener());
 		
 		JPanel panelCentralny = new JPanel();
 		JPanel panelPoludniowy = new JPanel();
@@ -80,7 +81,7 @@ public class GUI {
 	
 	private void konfigurujPolaczenie() {
 		try {
-			gniazdo = new Socket("127.0.0.1", 5000);
+			gniazdo = new Socket("localhost", 5437);
 			printer = new PrintWriter(gniazdo.getOutputStream());
 			reader = new BufferedReader(new InputStreamReader(gniazdo.getInputStream()));
 		}
@@ -133,6 +134,57 @@ public class GUI {
 			// TODO Auto-generated method stub
 			
 		}
+	}
+	
+	public class exitListener implements WindowListener{
+
+		@Override
+		public void windowActivated(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void windowClosed(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void windowClosing(WindowEvent e) {
+			// TODO Auto-generated method stub
+			try {
+				gniazdo.shutdownOutput();
+			}
+			catch(IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		@Override
+		public void windowDeactivated(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void windowDeiconified(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void windowIconified(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void windowOpened(WindowEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+		
 	}
 
 }

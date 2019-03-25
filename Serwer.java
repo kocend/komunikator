@@ -19,11 +19,14 @@ public class Serwer {
 	
 	public void run() {
 		try {
-			ServerSocket gniazdoSerwera = new ServerSocket(5000);
+			ServerSocket gniazdoSerwera = new ServerSocket(5437);
 			strumienieDoOdbiorców = new ArrayList();
+			System.out.println("serwer dzia³a.");
 			
 			while(true) {
+				System.out.println("czekam na klienta...");
 				Socket gniazdoKlienta = gniazdoSerwera.accept();
+				System.out.println("mamy klienta ! na adresie: "+gniazdoKlienta.getInetAddress());
 				PrintWriter printer = new PrintWriter(gniazdoKlienta.getOutputStream());
 				strumienieDoOdbiorców.add(printer);
 				Thread watekKlienta = new Thread(new Odbiorca(gniazdoKlienta));
@@ -72,8 +75,15 @@ public class Serwer {
 		public void run() {
 			String wiadomosc;
 			try {
-				while((wiadomosc = input.readLine())!=null)
+				while(((wiadomosc = input.readLine())!=null)&&(!gniazdoKlienta.isInputShutdown()))
 					rozeslijWszystkim(wiadomosc);
+			}
+			catch(IOException ex) {
+				ex.printStackTrace();
+			}
+			
+			try {
+				strumienieDoOdbiorców.remove(this.gniazdoKlienta.getOutputStream());
 			}
 			catch(IOException ex) {
 				ex.printStackTrace();
