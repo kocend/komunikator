@@ -1,4 +1,4 @@
-package klientU¿ytkownika;
+package GUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,8 +21,7 @@ public class GUI {
 	private String nick;
 
 	public static void main(String[] args) {
-		GUI gui = new GUI();
-		gui.run();
+		new GUI().run();
 	}
 	
 	
@@ -54,13 +53,17 @@ public class GUI {
 		
 		panelPoludniowy.add(poleWpisywania);
 		panelPoludniowy.add(wyslij);
+
+		
 		
 		konfigurujPolaczenie();
+
+		new Login(ramka);
+		
+		//while(!login.isSuccesfullyLoggedIn());
 		
 		Thread watekOdbierajacy = new Thread(new Odbiorca());
 		watekOdbierajacy.start();
-		
-		nick = JOptionPane.showInputDialog("Podaj nick:");
 		
 		ramka.getContentPane().add(BorderLayout.CENTER,panelCentralny);
 		ramka.getContentPane().add(BorderLayout.SOUTH,panelPoludniowy);
@@ -68,12 +71,12 @@ public class GUI {
 		ramka.setLocation(400, 200);
 		ramka.setResizable(false);
 		ramka.setVisible(true);
-		
+		ramka.toBack();
 	}
 	
 	public void wyslijTekst() {
-		String tekst = poleWpisywania.getText();
-		printer.println(nick+": "+tekst);
+		String tekst = poleWpisywania.getText().trim();
+		printer.println(tekst);
 		printer.flush();
 		poleWpisywania.setText("");
 		poleWpisywania.requestFocus();
@@ -87,18 +90,28 @@ public class GUI {
 		}
 		catch(IOException ex) {
 			ex.printStackTrace();
-			JOptionPane.showMessageDialog(ramka, "Nie uda³o siê po³¹czyæ z serwerem.");
+			JOptionPane.showMessageDialog(ramka, "Nie uda³o siê po³¹czyæ z serwerem, spróbuj ponownie póŸniej.");
 			System.exit(1);
 		}
 		
 	}
+	
+	public static boolean authentication(String loginData) {
+		if(loginData.equals("kocend/abc123"))return true;
+		return false;
+	}
+	
+	public static boolean registry(String registryData) {
+		return true;
+	}
+	
 	
 	public class Odbiorca implements Runnable{
 		public void run() {
 			String wiadomosc;
 			try {
 				while((wiadomosc = reader.readLine())!=null) {
-					poleRozmowy.append("\n"+wiadomosc);
+					poleRozmowy.append(wiadomosc+"\n");
 				}
 			}
 			catch(IOException ex) {
@@ -152,7 +165,6 @@ public class GUI {
 
 		@Override
 		public void windowClosing(WindowEvent e) {
-			// TODO Auto-generated method stub
 			try {
 				gniazdo.shutdownOutput();
 			}
