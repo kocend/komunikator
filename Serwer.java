@@ -8,13 +8,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.io.*;
 
 public class Serwer {
 	
 	private static Connection connection;
-	private ArrayList streamsToClients;
+	private LinkedList<PrintWriter> streamsToClients;
 	
 	public static void main(String [] args) {
 		new Serwer().run();
@@ -22,9 +25,10 @@ public class Serwer {
 	}
 	
 	private void run() {
+		
 		try {
 			ServerSocket serverSocket = new ServerSocket(5437);
-			streamsToClients = new ArrayList();
+			streamsToClients = new LinkedList<PrintWriter>();
 			System.out.println("serwer dzia³a.");
 			
 			Class.forName("org.hsqldb.jdbcDriver");
@@ -34,8 +38,6 @@ public class Serwer {
 				System.out.println("czekam na klienta...");
 				Socket clientSocket = serverSocket.accept();
 				System.out.println("mamy klienta ! na adresie: "+clientSocket.getInetAddress());
-				PrintWriter printer = new PrintWriter(clientSocket.getOutputStream());
-				streamsToClients.add(printer);
 				Thread clientThread = new Thread(new Client(clientSocket));
 				clientThread.start();
 			}
@@ -49,17 +51,20 @@ public class Serwer {
 		
 	}
 	
-	private synchronized ResultSet queryToBAse(String query) {
-		ResultSet result = null;
-		
-		try {
-			Statement statement = connection.createStatement();
-			result = statement.executeQuery(query);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return result;
-	}
+	
+	  private synchronized ResultSet queryToBAse(String query) { 
+		 
+		  ResultSet result = null;
+	  
+		  try { 
+			  Statement statement = connection.createStatement();
+			  result = statement.executeQuery(query);
+		  } catch (SQLException e) {
+			  e.printStackTrace(); 
+		  } 
+		  return result;
+	  }
+	 
 
 	
 	private void sendToEveryone(String message) {
@@ -67,9 +72,9 @@ public class Serwer {
 		Iterator it = streamsToClients.iterator();
 		while(it.hasNext()) {
 			try {
-			PrintWriter printer = (PrintWriter)it.next();
-			printer.println(message);
-			printer.flush();
+				PrintWriter printer = (PrintWriter)it.next();
+				printer.println(message);
+				printer.flush();
 			}
 			catch (Exception ex) {
 				ex.printStackTrace();
@@ -82,33 +87,31 @@ public class Serwer {
 	class Client implements Runnable{
 		private Integer ID;
 		private String nick;
-		private BufferedReader input;
+		private BufferedReader socketIn;
 		private Socket clientSocket;
 		
 		public Client(Socket socket) {
 			ID = null;
 			try {
 				clientSocket = socket;
-				InputStreamReader isr = new InputStreamReader(clientSocket.getInputStream());
-				input = new BufferedReader(isr);
+				socketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
-			
 		}
 		
 		public void run() {
-			boolean ifLoggedIn = login();
-			if(ifLoggedIn) {
-				String message;
+			if(login()) {
 				try {
-					while(((message = input.readLine())!=null)&&(!clientSocket.isInputShutdown())) {
-						sendToEveryone(message);
-					}
-					streamsToClients.remove(this.clientSocket.getOutputStream());
-				}
-				catch(IOException ex) {
-					ex.printStackTrace();
+					streamsToClients.add(new PrintWriter(clientSocket.getOutputStream()));
+				
+					String message;
+					while(((message = socketIn.readLine())!=null)&&(!clientSocket.isInputShutdown()))
+						sendToEveryone(nick+": " + message);
+				
+					streamsToClients.remove(clientSocket.getOutputStream());
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -117,43 +120,61 @@ public class Serwer {
 			String loginData;
 			String login = null;
 			try {
-				while(((loginData = input.readLine())!=null)&&(!clientSocket.isInputShutdown())) {
-					sendToEveryone(loginData);
+				while(((loginData = socketIn.readLine())!=null)&&(!clientSocket.isInputShutdown())) {
+					
+					PrintWriter socketOut = new PrintWriter(clientSocket.getOutputStream());
+					
+					String [] ifCorrectNumberofSlash = loginData.split("/");
+					if(ifCorrectNumberofSlash.length!=3) {
+						socketOut.println("false");
+						socketOut.flush();
+						continue;
+					}
+					
 					StringTokenizer str = new StringTokenizer(loginData);
 					String marker = str.nextToken("/");
 					login = str.nextToken("/").trim();
-					String passwd = " ";
+					
+					String passwd = "";
 					if(str.hasMoreTokens())
 						passwd = str.nextToken().trim();
-					System.out.println(login +" "+passwd);
+					
 					Integer id=null;
-					if(marker.equals("r"))
-						id = SignIn(login, passwd);
-					else if(marker.equals("l")) {
+					
+					if(marker.equals("r")) {
 						id = SignUp(login, passwd);
 						if(id!=null) {
-							sendToEveryone("zalogowano jako id = "+id);
+							socketOut.println("true");
+							socketOut.flush();
+							continue;
+						}
+					}
+					else if(marker.equals("l")) {
+						id = SignIn(login, passwd);
+						if(id!=null) {
+							socketOut.println("true");
+							socketOut.flush();
 							ID=id;
 							break;
 						}
 					}
-					else sendToEveryone("nie udalo sie zalogowac");
+					
+					socketOut.println("false");
+					socketOut.flush();
 				}
 				if(clientSocket.isInputShutdown()) {
-					streamsToClients.remove(this.clientSocket.getOutputStream());
 					return false;
 					}
 			}
 			catch(IOException ex) {
 				ex.printStackTrace();
 			}
-			
 			this.nick = login;
 			return true;
 		}
 	}
 	
-	private synchronized Integer SignIn(String login, String password) {
+	private Integer SignIn(String login, String password) {
 		Integer id = null;
 		String query = "SELECT ID FROM USERS WHERE " 
 						+"nick = '"+login
@@ -170,7 +191,7 @@ public class Serwer {
 		return id;
 	}
 	
-	private synchronized Integer SignUp(String login, String password) {
+	private Integer SignUp(String login, String password) {
 		Integer id = null;
 		String query = "SELECT ID FROM USERS WHERE "
 						+"nick = '"+login
