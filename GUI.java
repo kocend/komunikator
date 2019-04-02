@@ -29,11 +29,11 @@ public class GUI {
 	
 
 	public static void main(String[] args) {
-		if(args.length!=1) {
-			System.out.println("adres ip serwera wymagany.");
-			System.exit(3);
-		}
-		serverAddress = args[0];
+		/*
+		 * if(args.length!=1) { System.out.println("adres ip serwera wymagany.");
+		 * System.exit(3); } serverAddress = args[0];
+		 */
+		serverAddress = "localhost";
 		new GUI().run();
 	}
 	

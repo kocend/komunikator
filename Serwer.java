@@ -104,12 +104,14 @@ public class Serwer {
 			if(login()) {
 				try {
 					streamsToClients.add(new PrintWriter(clientSocket.getOutputStream()));
+					sendToEveryone("Server: "+nick+" has just logged in.");
 				
 					String message;
 					while(((message = socketIn.readLine())!=null)&&(!clientSocket.isInputShutdown()))
 						sendToEveryone(nick+": " + message);
 				
 					streamsToClients.remove(clientSocket.getOutputStream());
+					sendToEveryone("Server: "+nick+" has just logged out.");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
