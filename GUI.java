@@ -13,17 +13,17 @@ import java.util.LinkedList;
 
 
 public class GUI {
-	private JFrame ramka;
-	private JTextField poleWpisywania;
-	private JTextArea poleRozmowy;
-	private JPanel panelCentralny;
-	private JPanel panelPoludniowy;
+	private JFrame frame;
+	private JTextField typingField;
+	private JTextArea conversationArea;
+	private JPanel centralPanel;
+	private JPanel southPanel;
 	private JTextField loginField;
 	private JTextField passwordField;
 	private JPanel loginPanel;
-	private Socket gniazdo;
-	private PrintWriter printer;
-	private BufferedReader reader;
+	private Socket socket;
+	private PrintWriter socketOut;
+	private BufferedReader socketIn;
 	private String userName;
 	
 
@@ -33,44 +33,44 @@ public class GUI {
 	
 	
 	void run() {
-		ramka =  new JFrame("komunikator 2.0");
-		ramka.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		ramka.addWindowListener( new exitListener());
+		frame =  new JFrame("komunikator 2.0");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.addWindowListener( new exitListener());
 		
-		panelCentralny = new JPanel();
-		panelPoludniowy = new JPanel();
-		
-		
-		JButton wyslij = new JButton("wyœlij");
-		wyslij.addActionListener(new wyslijListener());
-		
-		poleWpisywania = new JTextField(25);
-		poleWpisywania.addKeyListener(new poleWpisywaniaListener());
-		poleWpisywania.requestFocusInWindow();
-		
-		poleRozmowy = new JTextArea(20, 30);
-		poleRozmowy.setEditable(false);
-		poleRozmowy.setLineWrap(true);
-		
-		JScrollPane przewijanie = new JScrollPane(poleRozmowy);
-		przewijanie.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		przewijanie.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		
-		panelCentralny.add(przewijanie);
-		
-		panelPoludniowy.add(poleWpisywania);
-		panelPoludniowy.add(wyslij);
+		centralPanel = new JPanel();
+		southPanel = new JPanel();
 		
 		
-		konfigurujPolaczenie();
+		JButton sendButton = new JButton("wyœlij");
+		sendButton.addActionListener(new sendButtonListener());
+		
+		typingField = new JTextField(25);
+		typingField.addKeyListener(new typingFieldListener());
+		typingField.requestFocusInWindow();
+		
+		conversationArea = new JTextArea(20, 30);
+		conversationArea.setEditable(false);
+		conversationArea.setLineWrap(true);
+		
+		JScrollPane scrolling = new JScrollPane(conversationArea);
+		scrolling.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scrolling.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		
+		centralPanel.add(scrolling);
+		
+		southPanel.add(typingField);
+		southPanel.add(sendButton);
 		
 		
-		ramka.setSize(400, 100);
-		ramka.setLocation(400, 200);
-		ramka.setResizable(false);
+		configureConnection();
 		
 		
-		//logowanie
+		frame.setSize(400, 100);
+		frame.setLocation(400, 200);
+		frame.setResizable(false);
+		
+		
+		//logging in
 		loginPanel = new JPanel();
 		loginPanel.setLayout(new GridLayout(3, 2));
 		
@@ -90,42 +90,42 @@ public class GUI {
     	loginPanel.add(loginButton);
     	loginPanel.add(registerButton);
     	
-    	ramka.getContentPane().add(BorderLayout.CENTER,loginPanel);
+    	frame.getContentPane().add(BorderLayout.CENTER,loginPanel);
     	
-    	ramka.setVisible(true);
+    	frame.setVisible(true);
 	}
 	
-	public void wyslijTekst() {
-		String message = poleWpisywania.getText().trim();
-		printer.println(message);
-		printer.flush();
-		poleWpisywania.setText("");
-		poleWpisywania.requestFocus();
+	public void sendText() {
+		String message = typingField.getText().trim();
+		socketOut.println(message);
+		socketOut.flush();
+		typingField.setText("");
+		typingField.requestFocus();
 	}
 	
 	public void loggedIn() {
-		ramka.setVisible(false);
+		frame.setVisible(false);
 		
-		ramka.setSize(400, 400);
-		ramka.getContentPane().remove(loginPanel);
-		ramka.getContentPane().add(BorderLayout.CENTER,panelCentralny);
-		ramka.getContentPane().add(BorderLayout.SOUTH,panelPoludniowy);
+		frame.setSize(400, 400);
+		frame.getContentPane().remove(loginPanel);
+		frame.getContentPane().add(BorderLayout.CENTER,centralPanel);
+		frame.getContentPane().add(BorderLayout.SOUTH,southPanel);
 		
-		ramka.setVisible(true);
+		frame.setVisible(true);
 		
-		Thread watekOdbierajacy = new Thread(new Odbiorca());
-		watekOdbierajacy.start();
+		Thread receiverThread = new Thread(new Receiver());
+		receiverThread.start();
 	}
 	
-	private void konfigurujPolaczenie() {
+	private void configureConnection() {
 		try {
-			gniazdo = new Socket("localhost", 5437);
-			printer = new PrintWriter(gniazdo.getOutputStream());
-			reader = new BufferedReader(new InputStreamReader(gniazdo.getInputStream()));
+			socket = new Socket("localhost", 5437);
+			socketOut = new PrintWriter(socket.getOutputStream());
+			socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		}
 		catch(IOException ex) {
 			ex.printStackTrace();
-			JOptionPane.showMessageDialog(ramka, "Nie uda³o siê po³¹czyæ z serwerem, spróbuj ponownie póŸniej.");
+			JOptionPane.showMessageDialog(frame, "Nie uda³o siê po³¹czyæ z serwerem, spróbuj ponownie póŸniej.");
 			System.exit(1);
 		}
 	}
@@ -155,13 +155,12 @@ public class GUI {
 	
 	public boolean authentication(String loginData) {
 		loginData = "l/"+loginData.trim();
-		  printer.println(loginData); 
-		  printer.flush();
+		socketOut.println(loginData); 
+		socketOut.flush();
 
 		String serverResponse = null;
 		try {
-			serverResponse = reader.readLine();
-			System.out.println(serverResponse);
+			serverResponse = socketIn.readLine();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -173,13 +172,12 @@ public class GUI {
 	
 	public boolean register(String registerData) {
 		registerData = "r/"+registerData.trim();
-		printer.println(registerData);
-		printer.flush();
+		socketOut.println(registerData);
+		socketOut.flush();
 		
 		String serverResponse = null;
 		try {
-			serverResponse = reader.readLine();
-			System.out.println(serverResponse);
+			serverResponse = socketIn.readLine();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -190,12 +188,12 @@ public class GUI {
 	}
 	
 	
-	public class Odbiorca implements Runnable{
+	public class Receiver implements Runnable{
 		public void run() {
-			String wiadomosc;
+			String message;
 			try {
-				while((wiadomosc = reader.readLine())!=null) {
-					poleRozmowy.append(wiadomosc+"\n");
+				while((message = socketIn.readLine())!=null) {
+					conversationArea.append(message+"\n");
 				}
 			}
 			catch(IOException ex) {
@@ -205,9 +203,9 @@ public class GUI {
 	}
 	
 	
-	public class wyslijListener implements ActionListener{
+	public class sendButtonListener implements ActionListener{
 		public void actionPerformed(ActionEvent event) {
-			wyslijTekst();
+			sendText();
 		}
 	}
 	
@@ -219,17 +217,17 @@ public class GUI {
 				if(!passwordField.getText().equals("")) {
 					String loginData = login+"/"+passwordField.getText().trim();
 					if(authentication(loginData)) {
-						JOptionPane.showMessageDialog(ramka, "Witaj "+login+"! zosta³eœ zalogowany.");
+						JOptionPane.showMessageDialog(frame, "Witaj "+login+"! zosta³eœ zalogowany.");
 						userName = login;
 						loggedIn();
 					}
 					else {
-						JOptionPane.showMessageDialog(ramka, "niepoprawny login lub has³o.");
+						JOptionPane.showMessageDialog(frame, "niepoprawny login lub has³o.");
 					}
 				}
-				else JOptionPane.showMessageDialog(ramka, "has³o nie mo¿e byæ puste!");
+				else JOptionPane.showMessageDialog(frame, "has³o nie mo¿e byæ puste!");
 			}
-			else JOptionPane.showMessageDialog(ramka, "niepoprawny login, u¿yto niedozwolonych znaków.");
+			else JOptionPane.showMessageDialog(frame, "niepoprawny login, u¿yto niedozwolonych znaków.");
 			loginField.setText("");
 			passwordField.setText("");
 		}
@@ -243,29 +241,29 @@ public class GUI {
 				if(!passwordField.getText().equals("")) {
 					String loginData = login+"/"+passwordField.getText().trim();
 					if(register(loginData)) {
-						JOptionPane.showMessageDialog(ramka, "Witaj "+login+"! zosta³eœ pomyœlnie zarejestrowany.");
+						JOptionPane.showMessageDialog(frame, "Witaj "+login+"! zosta³eœ pomyœlnie zarejestrowany.");
 						userName = login;
 					}
 					else {
-						JOptionPane.showMessageDialog(ramka, "taki u¿ytkownik ju¿ istnieje!");
+						JOptionPane.showMessageDialog(frame, "taki u¿ytkownik ju¿ istnieje!");
 					}
 				}
-				else JOptionPane.showMessageDialog(ramka, "has³o nie mo¿e byæ puste!");
+				else JOptionPane.showMessageDialog(frame, "has³o nie mo¿e byæ puste!");
 			}
-			else JOptionPane.showMessageDialog(ramka, "niepoprawny login, u¿yto niedozwolonych znaków.");
+			else JOptionPane.showMessageDialog(frame, "niepoprawny login, u¿yto niedozwolonych znaków.");
 			loginField.setText("");
 			passwordField.setText("");
 		}
 	}
 	
 	
-	public class poleWpisywaniaListener implements KeyListener{
+	public class typingFieldListener implements KeyListener{
 
 		@Override
 		public void keyPressed(KeyEvent arg0) {
 			// TODO Auto-generated method stub
 			if(arg0.getKeyChar()=='\n') {
-				wyslijTekst();
+				sendText();
 			}
 		}
 
@@ -299,7 +297,7 @@ public class GUI {
 		@Override
 		public void windowClosing(WindowEvent e) {
 			  try {
-				  gniazdo.shutdownOutput();
+				  socket.shutdownOutput();
 				  } catch(IOException ex) {
 					  ex.printStackTrace(); 
 			  }
