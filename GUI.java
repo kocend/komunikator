@@ -21,6 +21,7 @@ public class GUI {
 	private JTextField loginField;
 	private JTextField passwordField;
 	private JPanel loginPanel;
+	private static String serverAddress;
 	private Socket socket;
 	private PrintWriter socketOut;
 	private BufferedReader socketIn;
@@ -28,6 +29,11 @@ public class GUI {
 	
 
 	public static void main(String[] args) {
+		if(args.length!=1) {
+			System.out.println("adres ip serwera wymagany.");
+			System.exit(3);
+		}
+		serverAddress = args[0];
 		new GUI().run();
 	}
 	
@@ -119,7 +125,7 @@ public class GUI {
 	
 	private void configureConnection() {
 		try {
-			socket = new Socket("localhost", 5437);
+			socket = new Socket(serverAddress, 5437);
 			socketOut = new PrintWriter(socket.getOutputStream());
 			socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		}
