@@ -103,8 +103,8 @@ public class Serwer {
 		public void run() {
 			if(login()) {
 				try {
-					streamsToClients.add(new PrintWriter(clientSocket.getOutputStream()));
 					sendToEveryone("Server: "+nick+" has just logged in.");
+					streamsToClients.add(new PrintWriter(clientSocket.getOutputStream()));
 				
 					String message;
 					while(((message = socketIn.readLine())!=null)&&(!clientSocket.isInputShutdown()))

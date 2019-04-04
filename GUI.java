@@ -19,7 +19,7 @@ public class GUI {
 	private JPanel centralPanel;
 	private JPanel southPanel;
 	private JTextField loginField;
-	private JTextField passwordField;
+	private JPasswordField passwordField;
 	private JPanel loginPanel;
 	private static String serverAddress;
 	private Socket socket;
@@ -33,7 +33,7 @@ public class GUI {
 		 * if(args.length!=1) { System.out.println("adres ip serwera wymagany.");
 		 * System.exit(3); } serverAddress = args[0];
 		 */
-		serverAddress = "localhost";
+		serverAddress = "83.28.134.153";
 		new GUI().run();
 	}
 	
@@ -81,7 +81,7 @@ public class GUI {
 		loginPanel.setLayout(new GridLayout(3, 2));
 		
 		loginField = new JTextField(15);
-    	passwordField = new JTextField(15);
+    	passwordField = new JPasswordField(15);
     	JLabel loginLabel = new JLabel("login: ");
     	JLabel passwordLabel = new JLabel("has³o: ");
     	JButton loginButton = new JButton("login");
@@ -112,7 +112,7 @@ public class GUI {
 	public void loggedIn() {
 		frame.setVisible(false);
 		
-		frame.setSize(400, 400);
+		frame.setSize(400, 410);
 		frame.getContentPane().remove(loginPanel);
 		frame.getContentPane().add(BorderLayout.CENTER,centralPanel);
 		frame.getContentPane().add(BorderLayout.SOUTH,southPanel);
