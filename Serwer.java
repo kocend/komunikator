@@ -126,6 +126,14 @@ public class Serwer {
 					
 					PrintWriter socketOut = new PrintWriter(clientSocket.getOutputStream());
 					
+					System.out.println(loginData);
+					
+					if (loginData.contains("'")) {
+							socketOut.println("false");
+							socketOut.flush();
+							continue;
+					}
+					
 					String [] ifCorrectNumberofSlash = loginData.split("/");
 					if(ifCorrectNumberofSlash.length!=3) {
 						socketOut.println("false");
@@ -135,11 +143,11 @@ public class Serwer {
 					
 					StringTokenizer str = new StringTokenizer(loginData);
 					String marker = str.nextToken("/");
-					login = str.nextToken("/").trim();
+					login = str.nextToken("/");
 					
 					String passwd = "";
 					if(str.hasMoreTokens())
-						passwd = str.nextToken().trim();
+						passwd = str.nextToken();
 					
 					Integer id=null;
 					

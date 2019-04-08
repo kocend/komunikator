@@ -33,7 +33,7 @@ public class GUI {
 		 * if(args.length!=1) { System.out.println("adres ip serwera wymagany.");
 		 * System.exit(3); } serverAddress = args[0];
 		 */
-		serverAddress = "83.28.134.153";
+		serverAddress = "localhost";
 		new GUI().run();
 	}
 	
@@ -50,7 +50,7 @@ public class GUI {
 		JButton sendButton = new JButton("wyœlij");
 		sendButton.addActionListener(new sendButtonListener());
 		
-		typingField = new JTextField(25);
+		typingField = new JTextField(24);
 		typingField.addKeyListener(new typingFieldListener());
 		typingField.requestFocusInWindow();
 		
@@ -158,6 +158,13 @@ public class GUI {
 			return false;
 	}
 	
+	private boolean testCorrectnessOfPassword(String password) {
+		if(password.contains("'")||password.contains("/")||password.contains("\\"))
+			return false;
+		else
+			return true;
+	}
+	
 	
 	public boolean authentication(String loginData) {
 		loginData = "l/"+loginData.trim();
@@ -244,17 +251,20 @@ public class GUI {
 		public void actionPerformed(ActionEvent e) {
 			String login = loginField.getText().trim();
 			if(testCorrectnessOfLogin(login)) {
-				if(!passwordField.getText().equals("")) {
-					String loginData = login+"/"+passwordField.getText().trim();
-					if(register(loginData)) {
-						JOptionPane.showMessageDialog(frame, "Witaj "+login+"! zosta³eœ pomyœlnie zarejestrowany.");
-						userName = login;
+				if(testCorrectnessOfPassword(passwordField.getText())) {
+					if(!passwordField.getText().equals("")) {
+						String loginData = login+"/"+passwordField.getText().trim();
+						if(register(loginData)) {
+							JOptionPane.showMessageDialog(frame, "Witaj "+login+"! zosta³eœ pomyœlnie zarejestrowany.");
+							userName = login;
+						}
+						else {
+							JOptionPane.showMessageDialog(frame, "taki u¿ytkownik ju¿ istnieje!");
+						}
 					}
-					else {
-						JOptionPane.showMessageDialog(frame, "taki u¿ytkownik ju¿ istnieje!");
-					}
-				}
 				else JOptionPane.showMessageDialog(frame, "has³o nie mo¿e byæ puste!");
+				}
+				else JOptionPane.showMessageDialog(frame, "has³o zawiera niedozwolone znaki takie jak:   '   /   \\     ");
 			}
 			else JOptionPane.showMessageDialog(frame, "niepoprawny login, u¿yto niedozwolonych znaków.");
 			loginField.setText("");
