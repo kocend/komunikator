@@ -58,7 +58,7 @@ public class GUI {
 		typingField.addKeyListener(new typingFieldListener());
 		typingField.requestFocusInWindow();
 		
-		conversationArea = new JTextArea(21, 25);
+		conversationArea = new JTextArea(20, 25);
 		conversationArea.setEditable(false);
 		conversationArea.setLineWrap(true);
 		
