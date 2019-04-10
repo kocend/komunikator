@@ -16,7 +16,7 @@ public class GUI {
 	private JFrame frame;
 	private JTextField typingField;
 	private JTextArea conversationArea;
-	//private JCheckBox contactsBox;
+	//private JList contactsList;
 	private JPanel centralPanel;
 	private JPanel southPanel;
 	//private JPanel contactsPanel;
