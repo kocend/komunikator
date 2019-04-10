@@ -10,16 +10,18 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.*;
 import java.util.LinkedList;
+import java.util.StringTokenizer;
 
 
 public class GUI {
 	private JFrame frame;
 	private JTextField typingField;
 	private JTextArea conversationArea;
-	//private JList contactsList;
+	private JList activeUsersList;
+	private DefaultListModel<String> activeUsers;
 	private JPanel centralPanel;
 	private JPanel southPanel;
-	//private JPanel contactsPanel;
+	private JPanel contactsPanel;
 	private JTextField loginField;
 	private JPasswordField passwordField;
 	private JPanel loginPanel;
@@ -47,32 +49,46 @@ public class GUI {
 		
 		centralPanel = new JPanel();
 		southPanel = new JPanel();
-		//contactsPanel = new JPanel();
+		contactsPanel = new JPanel();
 		
 		JButton sendButton = new JButton("wyœlij");
 		sendButton.addActionListener(new sendButtonListener());
 		
-		typingField = new JTextField(24);
+		typingField = new JTextField(28);
 		typingField.addKeyListener(new typingFieldListener());
 		typingField.requestFocusInWindow();
 		
-		conversationArea = new JTextArea(20, 30);
+		conversationArea = new JTextArea(21, 25);
 		conversationArea.setEditable(false);
 		conversationArea.setLineWrap(true);
 		
-		JScrollPane scrolling = new JScrollPane(conversationArea);
-		scrolling.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		scrolling.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		
-		//contactsBox = new JCheckBox();
-		//contactsBox.setSize(10, 30);
+		JLabel onlineUserLabel = new JLabel("online:");
 		
-		centralPanel.add(scrolling);
+		activeUsers = new DefaultListModel<String>();
+		activeUsersList = new JList<String>(activeUsers);
+		//activeUsersList.setVisibleRowCount(5);
+		//activeUsersList.setFixedCellWidth(5);
+		activeUsersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		
+		
+		JScrollPane conversationAreaScrolling = new JScrollPane(conversationArea);
+		conversationAreaScrolling.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		conversationAreaScrolling.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		
+		JScrollPane contactsListScrolling = new JScrollPane(activeUsersList);
+		contactsListScrolling.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		contactsListScrolling.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		
+		centralPanel.add(conversationAreaScrolling);
 		
 		southPanel.add(typingField);
 		southPanel.add(sendButton);
 		
-		//contactsPanel.add(contactsBox);
+		contactsPanel.setLayout(new BoxLayout(contactsPanel, BoxLayout.Y_AXIS));
+		contactsPanel.add(onlineUserLabel);
+		contactsPanel.add(contactsListScrolling);
+		
 		
 		configureConnection();
 		
@@ -120,9 +136,9 @@ public class GUI {
 		
 		frame.setSize(400, 410);
 		frame.getContentPane().remove(loginPanel);
-		frame.getContentPane().add(BorderLayout.CENTER,centralPanel);
+		frame.getContentPane().add(BorderLayout.WEST,centralPanel);
 		frame.getContentPane().add(BorderLayout.SOUTH,southPanel);
-		//frame.getContentPane().add(BorderLayout.EAST,contactsPanel);
+		frame.getContentPane().add(BorderLayout.CENTER,contactsPanel);
 		
 		frame.setVisible(true);
 		
@@ -196,13 +212,34 @@ public class GUI {
 			String message;
 			try {
 				while(((message = socketIn.readLine())!=null)&&(!socket.isInputShutdown())) {
-					conversationArea.append(message+"\n");
+					
+					StringTokenizer str = new StringTokenizer(message);
+					String command = str.nextToken("/");
+					String text = str.nextToken("\n");
+					text=text.substring(1);
+					
+					switch(command) {
+					case "message": conversationArea.append(text+"\n");
+						break;
+					case "online": addToOnlineUsers(text);
+						break;
+					case "offline": removeFromOnlineUsers(text);
+						break;
+					}
 				}
 			}
 			catch(IOException ex) {
 				ex.printStackTrace();
 			}
 		}
+	}
+	
+	private void addToOnlineUsers(String user) {
+		activeUsers.addElement(user);
+	}
+	
+	private void removeFromOnlineUsers(String user) {
+		activeUsers.removeElement(user);
 	}
 	
 	

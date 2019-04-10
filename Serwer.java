@@ -18,6 +18,7 @@ public class Serwer {
 	
 	private static Connection connection;
 	private LinkedList<PrintWriter> streamsToClients;
+	private LinkedList<String> activeUsersNicks;
 	
 	public static void main(String [] args) {
 		new Serwer().run();
@@ -29,6 +30,7 @@ public class Serwer {
 		try {
 			ServerSocket serverSocket = new ServerSocket(5437);
 			streamsToClients = new LinkedList<PrintWriter>();
+			activeUsersNicks = new LinkedList<String>();
 			System.out.println("serwer dzia³a.");
 			
 			Class.forName("org.hsqldb.jdbcDriver");
@@ -103,15 +105,19 @@ public class Serwer {
 		public void run() {
 			if(login()) {
 				try {
-					sendToEveryone("Server: "+nick+" has just logged in.");
+					//sendToEveryone("Server: "+nick+" has just logged in.");
+					activeUsersNicks.add(nick);
+					sendToEveryone("online/"+nick);
 					streamsToClients.add(new PrintWriter(clientSocket.getOutputStream()));
 				
 					String message;
 					while(((message = socketIn.readLine())!=null)&&(!clientSocket.isInputShutdown()))
-						sendToEveryone(nick+": " + message);
+						sendToEveryone("message/"+nick+": " + message);
 				
 					streamsToClients.remove(clientSocket.getOutputStream());
-					sendToEveryone("Server: "+nick+" has just logged out.");
+					sendToEveryone("offline/"+nick);
+					activeUsersNicks.remove(nick);
+					//sendToEveryone("Server: "+nick+" has just logged out.");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -179,8 +185,22 @@ public class Serwer {
 			catch(IOException ex) {
 				ex.printStackTrace();
 			}
+			sendActiveUsers();
 			this.nick = login;
 			return true;
+		}
+		
+		private void sendActiveUsers() {
+			try {
+				PrintWriter socketOut = new PrintWriter(clientSocket.getOutputStream());
+				Iterator it = activeUsersNicks.iterator();
+				while(it.hasNext()) {
+					socketOut.println("online/"+(String)it.next());
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
 		}
 	}
 	
