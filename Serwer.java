@@ -149,6 +149,7 @@ public class Serwer {
 					if(str.hasMoreTokens())
 						passwd = str.nextToken();
 					
+					
 					Integer id=null;
 					
 					if(marker.equals("r")) {
@@ -159,7 +160,8 @@ public class Serwer {
 							continue;
 						}
 					}
-					else if(marker.equals("l")) {
+					
+					if(marker.equals("l")) {
 						id = SignIn(login, passwd);
 						if(id!=null) {
 							socketOut.println("true");
@@ -172,9 +174,7 @@ public class Serwer {
 					socketOut.println("false");
 					socketOut.flush();
 				}
-				if(clientSocket.isInputShutdown()) {
-					return false;
-					}
+				if(clientSocket.isInputShutdown()) return false;
 			}
 			catch(IOException ex) {
 				ex.printStackTrace();
@@ -184,7 +184,7 @@ public class Serwer {
 		}
 	}
 	
-	private Integer SignIn(String login, String password) {
+	private synchronized Integer SignIn(String login, String password) {
 		Integer id = null;
 		String query = "SELECT ID FROM USERS WHERE " 
 						+"nick = '"+login
@@ -201,7 +201,7 @@ public class Serwer {
 		return id;
 	}
 	
-	private Integer SignUp(String login, String password) {
+	private synchronized Integer SignUp(String login, String password) {
 		Integer id = null;
 		String query = "SELECT ID FROM USERS WHERE "
 						+"nick = '"+login

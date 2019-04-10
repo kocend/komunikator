@@ -16,8 +16,10 @@ public class GUI {
 	private JFrame frame;
 	private JTextField typingField;
 	private JTextArea conversationArea;
+	//private JCheckBox contactsBox;
 	private JPanel centralPanel;
 	private JPanel southPanel;
+	//private JPanel contactsPanel;
 	private JTextField loginField;
 	private JPasswordField passwordField;
 	private JPanel loginPanel;
@@ -45,7 +47,7 @@ public class GUI {
 		
 		centralPanel = new JPanel();
 		southPanel = new JPanel();
-		
+		//contactsPanel = new JPanel();
 		
 		JButton sendButton = new JButton("wyœlij");
 		sendButton.addActionListener(new sendButtonListener());
@@ -62,11 +64,15 @@ public class GUI {
 		scrolling.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		scrolling.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		
+		//contactsBox = new JCheckBox();
+		//contactsBox.setSize(10, 30);
+		
 		centralPanel.add(scrolling);
 		
 		southPanel.add(typingField);
 		southPanel.add(sendButton);
 		
+		//contactsPanel.add(contactsBox);
 		
 		configureConnection();
 		
@@ -116,6 +122,7 @@ public class GUI {
 		frame.getContentPane().remove(loginPanel);
 		frame.getContentPane().add(BorderLayout.CENTER,centralPanel);
 		frame.getContentPane().add(BorderLayout.SOUTH,southPanel);
+		//frame.getContentPane().add(BorderLayout.EAST,contactsPanel);
 		
 		frame.setVisible(true);
 		
@@ -167,27 +174,10 @@ public class GUI {
 	
 	
 	public boolean authentication(String loginData) {
-		loginData = "l/"+loginData.trim();
+		loginData = loginData.trim();
 		socketOut.println(loginData); 
 		socketOut.flush();
 
-		String serverResponse = null;
-		try {
-			serverResponse = socketIn.readLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		if(("true").equals(serverResponse.trim()))
-			return true;
-		return false;
-	}
-	
-	public boolean register(String registerData) {
-		registerData = "r/"+registerData.trim();
-		socketOut.println(registerData);
-		socketOut.flush();
-		
 		String serverResponse = null;
 		try {
 			serverResponse = socketIn.readLine();
@@ -205,7 +195,7 @@ public class GUI {
 		public void run() {
 			String message;
 			try {
-				while((message = socketIn.readLine())!=null) {
+				while(((message = socketIn.readLine())!=null)&&(!socket.isInputShutdown())) {
 					conversationArea.append(message+"\n");
 				}
 			}
@@ -228,7 +218,7 @@ public class GUI {
 			String login = loginField.getText().trim();
 			if(testCorrectnessOfLogin(login)) {
 				if(!passwordField.getText().equals("")) {
-					String loginData = login+"/"+passwordField.getText().trim();
+					String loginData = "l/"+login+"/"+passwordField.getText().trim();
 					if(authentication(loginData)) {
 						JOptionPane.showMessageDialog(frame, "Witaj "+login+"! zosta³eœ zalogowany.");
 						userName = login;
@@ -253,8 +243,8 @@ public class GUI {
 			if(testCorrectnessOfLogin(login)) {
 				if(testCorrectnessOfPassword(passwordField.getText())) {
 					if(!passwordField.getText().equals("")) {
-						String loginData = login+"/"+passwordField.getText().trim();
-						if(register(loginData)) {
+						String loginData = "r/"+login+"/"+passwordField.getText().trim();
+						if(authentication(loginData)) {
 							JOptionPane.showMessageDialog(frame, "Witaj "+login+"! zosta³eœ pomyœlnie zarejestrowany.");
 							userName = login;
 						}
