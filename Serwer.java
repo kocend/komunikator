@@ -105,8 +105,8 @@ public class Serwer {
 		public void run() {
 			if(login()) {
 				try {
-					//sendToEveryone("Server: "+nick+" has just logged in.");
 					activeUsersNicks.add(nick);
+					//sendToEveryone("Server: "+nick+" has just logged in.");
 					sendToEveryone("online/"+nick);
 					streamsToClients.add(new PrintWriter(clientSocket.getOutputStream()));
 				
@@ -197,6 +197,7 @@ public class Serwer {
 				while(it.hasNext()) {
 					socketOut.println("online/"+(String)it.next());
 				}
+				socketOut.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
