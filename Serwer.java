@@ -155,6 +155,12 @@ public class Serwer {
 					if(str.hasMoreTokens())
 						passwd = str.nextToken();
 					
+					if(activeUsersNicks.contains(login)) {
+						socketOut.println("false");
+						socketOut.flush();
+						continue;
+					}
+					
 					
 					Integer id=null;
 					

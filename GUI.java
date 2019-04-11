@@ -43,6 +43,10 @@ public class GUI {
 	
 	
 	void run() {
+		
+		configureConnection();
+		
+		
 		frame =  new JFrame("komunikator 2.0");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.addWindowListener( new exitListener());
@@ -58,7 +62,9 @@ public class GUI {
 		typingField.addKeyListener(new typingFieldListener());
 		typingField.requestFocusInWindow();
 		
-		conversationArea = new JTextArea(20, 25);
+		JLabel conversationLabel = new JLabel("pole konwersacji:");
+		
+		conversationArea = new JTextArea(20, 26);
 		conversationArea.setEditable(false);
 		conversationArea.setLineWrap(true);
 		
@@ -67,8 +73,6 @@ public class GUI {
 		
 		activeUsers = new DefaultListModel<String>();
 		activeUsersList = new JList<String>(activeUsers);
-		//activeUsersList.setVisibleRowCount(5);
-		//activeUsersList.setFixedCellWidth(5);
 		activeUsersList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		
 		
@@ -80,6 +84,8 @@ public class GUI {
 		contactsListScrolling.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		contactsListScrolling.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		
+		centralPanel.setLayout(new BoxLayout(centralPanel, BoxLayout.Y_AXIS));
+		centralPanel.add(conversationLabel);
 		centralPanel.add(conversationAreaScrolling);
 		
 		southPanel.add(typingField);
@@ -88,9 +94,6 @@ public class GUI {
 		contactsPanel.setLayout(new BoxLayout(contactsPanel, BoxLayout.Y_AXIS));
 		contactsPanel.add(onlineUserLabel);
 		contactsPanel.add(contactsListScrolling);
-		
-		
-		configureConnection();
 		
 		
 		frame.setSize(400, 100);
@@ -230,6 +233,8 @@ public class GUI {
 			}
 			catch(IOException ex) {
 				ex.printStackTrace();
+				JOptionPane.showMessageDialog(frame, "po³¹czenie z serwerem zerwane, spróbuj uruchomiæ aplikacjê jeszcze raz.");
+				System.exit(1);
 			}
 		}
 	}
