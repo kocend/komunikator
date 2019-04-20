@@ -6,12 +6,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.io.*;
 
 public class Serwer {
@@ -106,7 +103,6 @@ public class Serwer {
 			if(login()) {
 				try {
 					activeUsersNicks.add(nick);
-					//sendToEveryone("Server: "+nick+" has just logged in.");
 					sendToEveryone("online/"+nick);
 					streamsToClients.add(new PrintWriter(clientSocket.getOutputStream()));
 				
@@ -117,7 +113,6 @@ public class Serwer {
 					streamsToClients.remove(clientSocket.getOutputStream());
 					sendToEveryone("offline/"+nick);
 					activeUsersNicks.remove(nick);
-					//sendToEveryone("Server: "+nick+" has just logged out.");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -169,7 +164,9 @@ public class Serwer {
 						if(id!=null) {
 							socketOut.println("true");
 							socketOut.flush();
-							continue;
+							//continue;
+							ID=id;
+							break;
 						}
 					}
 					
