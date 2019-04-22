@@ -20,10 +20,10 @@ import javafx.scene.text.Text;
 
 public class LoginScene {
 	
-	private NewBraveGui gui;
+	private Gui gui;
 	private Scene loginScene;
 
-	public LoginScene(NewBraveGui obj) {
+	public LoginScene(Gui obj) {
 		gui=obj;
 		Text loginLabel = new Text("Login");
 	    Text passwordLabel = new Text("Password"); 

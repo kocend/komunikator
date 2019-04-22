@@ -1,6 +1,5 @@
 package GUI;
 
-import java.util.LinkedList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,13 +16,14 @@ import javafx.scene.text.Text;
 
 public class ConversationScene {
 	
-	private NewBraveGui gui;
+	private Gui gui;
 	private Scene conversationScene;
 	private TextField typingField;
 	private TextArea conversationArea;
-	private LinkedList<String> activeUsers;
+	private ListView<String> onlineUsers;
 	
-	public ConversationScene(NewBraveGui obj) {
+
+	public ConversationScene(Gui obj) {
 		gui=obj;
 		Text areaLabel = new Text("rozmowa:");
 	    Text onlineLabel = new Text("online:"); 
@@ -33,10 +33,9 @@ public class ConversationScene {
 	    conversationArea.setWrapText(true);
 	    conversationArea.setEditable(false);
 	    
-	    activeUsers = new LinkedList<String>();
-	    ListView<String> onlineUsers = new ListView<String>();
+	    onlineUsers = new ListView<String>();
 	    onlineUsers.setPrefSize(20, 300);
-	    onlineUsers.getItems().addAll(activeUsers);
+	    onlineUsers.setEditable(false);
 	    
 	    
 	    typingField = new TextField();
@@ -94,7 +93,7 @@ public class ConversationScene {
 		return conversationArea;
 	}
 
-	public LinkedList<String> getActiveUsers() {
-		return activeUsers;
+	public ListView<String> getOnlineUsers() {
+		return onlineUsers;
 	}
 }

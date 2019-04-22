@@ -2,12 +2,15 @@ package GUI;
 
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import javafx.stage.StageBuilder;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
 import java.io.BufferedReader;
@@ -42,8 +45,17 @@ public class Gui extends Application {
 		
 		this.primaryStage = stage;
 		
-		//produkuje wyj¹tki
-		//stage.getIcons().add(new Image("images/icon.png"));
+		primaryStage.setTitle("Komunikator");
+		try {
+		primaryStage.getIcons().add(new Image("GUI/icon.png"));
+		}
+		catch(Exception ex) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setContentText("coœ z icon.png");
+			alert.showAndWait();
+			System.exit(1);
+		}
+		
 		
 		stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, new EventHandler<WindowEvent>() {
 			
@@ -61,6 +73,7 @@ public class Gui extends Application {
 		
 		Scene loginScene = new LoginScene(this).getInstance();
 		primaryStage.setScene(loginScene);
+		primaryStage.setResizable(false);
 		primaryStage.show();
 	}
 	
@@ -168,11 +181,23 @@ public class Gui extends Application {
 	
 	
 	private void addToOnlineUsers(String user) {
-		conversationScene.getActiveUsers().add(user);
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				conversationScene.getOnlineUsers().getItems().add(user);
+			}
+		});
 	}
 	
 	private void removeFromOnlineUsers(String user) {
-		conversationScene.getActiveUsers().remove(user);
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				conversationScene.getOnlineUsers().getItems().remove(user);
+			}
+		});
 	}
 	
 	
