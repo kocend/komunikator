@@ -51,7 +51,7 @@ public class Gui extends Application {
 		}
 		catch(Exception ex) {
 			Alert alert = new Alert(AlertType.ERROR);
-			alert.setContentText("coœ z icon.png");
+			alert.setContentText("problem z icon.png");
 			alert.showAndWait();
 			System.exit(1);
 		}
@@ -170,7 +170,6 @@ public class Gui extends Application {
 			catch(IOException ex) {
 				ex.printStackTrace();
 				Alert alert = new Alert(AlertType.ERROR);
-				alert.setHeaderText(null);
 				alert.setContentText("po³¹czenie z serwerem zerwane, spróbuj uruchomiæ aplikacjê jeszcze raz.");
 				alert.showAndWait();
 				System.exit(1);
