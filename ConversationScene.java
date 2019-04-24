@@ -1,5 +1,6 @@
 package GUI;
 
+import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,6 +11,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 
@@ -36,6 +38,7 @@ public class ConversationScene {
 	    onlineUsers = new ListView<String>();
 	    onlineUsers.setPrefSize(20, 300);
 	    onlineUsers.setEditable(false);
+	   
 	    
 	    
 	    typingField = new TextField();
@@ -49,11 +52,11 @@ public class ConversationScene {
 			
 		});
 	     
-	    Button sendButton = new Button("wyúlij"); 
-	    sendButton.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+	    Button sendButton = new Button("wy≈õlij"); 
+	    sendButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
 	    	
 			@Override
-			public void handle(KeyEvent event) {
+			public void handle(MouseEvent event) {
 				gui.sendText();
 			}
 			

@@ -51,7 +51,7 @@ public class Gui extends Application {
 		}
 		catch(Exception ex) {
 			Alert alert = new Alert(AlertType.ERROR);
-			alert.setContentText("coœ z icon.png");
+			alert.setContentText("problem z icon.png");
 			alert.showAndWait();
 			System.exit(1);
 		}
@@ -110,7 +110,7 @@ public class Gui extends Application {
 			ex.printStackTrace(); 
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setHeaderText(null); 
-			alert.setContentText("Nie uda³o siê po³¹czyæ z serwerem, spróbuj ponownie póŸniej."); 
+			alert.setContentText("Nie udaÅ‚o siÄ™ poÅ‚Ä…czyÄ‡ z serwerem, sprÃ³buj ponownie pÃ³Åºniej."); 
 			alert.showAndWait();
 			System.exit(1);
 		}
@@ -170,8 +170,7 @@ public class Gui extends Application {
 			catch(IOException ex) {
 				ex.printStackTrace();
 				Alert alert = new Alert(AlertType.ERROR);
-				alert.setHeaderText(null);
-				alert.setContentText("po³¹czenie z serwerem zerwane, spróbuj uruchomiæ aplikacjê jeszcze raz.");
+				alert.setContentText("poÅ‚Ä…czenie z serwerem zerwane, sprÃ³buj uruchomiÄ‡ aplikacjÄ™ jeszcze raz.");
 				alert.showAndWait();
 				System.exit(1);
 			}
