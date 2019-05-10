@@ -1,16 +1,13 @@
-package GUI;
+package chatClient;
 
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import javafx.stage.StageBuilder;
-import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
 import java.io.BufferedReader;
@@ -19,8 +16,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.*;
 import java.util.StringTokenizer;
-
-import javax.swing.JOptionPane;
 
 
 public class Gui extends Application {
@@ -35,7 +30,7 @@ public class Gui extends Application {
 	
 
 	public static void main(String[] args) {
-		serverAddress = "localhost";
+		serverAddress = "komunikator.zapto.org";
 		launch();
 	}
 	
@@ -45,35 +40,19 @@ public class Gui extends Application {
 		
 		this.primaryStage = stage;
 		
-		primaryStage.setTitle("Komunikator");
-		try {
-		primaryStage.getIcons().add(new Image("GUI/icon.png"));
-		}
-		catch(Exception ex) {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setContentText("problem z icon.png");
-			alert.showAndWait();
-			System.exit(1);
-		}
+		try{primaryStage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));}
+		catch(Exception ex) {System.out.println("brak icon.png w plikach bin programu");}
 		
-		
-		stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, new EventHandler<WindowEvent>() {
-			
-			@Override
-			public void handle(WindowEvent event) {
+		stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, (WindowEvent event)-> {
 				try {
 					socket.shutdownOutput();
+					stop();
 				}
-				catch(IOException ex) {
-					  ex.printStackTrace(); 
-				}
-			}
-		
-		});
+				catch(Exception ex) { ex.printStackTrace();}
+			});
 		
 		Scene loginScene = new LoginScene(this).getInstance();
 		primaryStage.setScene(loginScene);
-		primaryStage.setResizable(false);
 		primaryStage.show();
 	}
 	
@@ -107,10 +86,10 @@ public class Gui extends Application {
 			socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		}
 		catch(IOException ex) {
-			ex.printStackTrace(); 
 			Alert alert = new Alert(AlertType.ERROR);
+			alert.initOwner(primaryStage);
 			alert.setHeaderText(null); 
-			alert.setContentText("Nie udaÅ‚o siÄ™ poÅ‚Ä…czyÄ‡ z serwerem, sprÃ³buj ponownie pÃ³Åºniej."); 
+			alert.setContentText("Nie uda³o siê po³¹czyæ z serwerem, spróbuj ponownie póŸniej."); 
 			alert.showAndWait();
 			System.exit(1);
 		}
@@ -123,7 +102,7 @@ public class Gui extends Application {
 		socketOut.println(loginData); 
 		socketOut.flush();
 
-		String serverResponse = null;
+		String serverResponse = "false";
 		try {
 			serverResponse = socketIn.readLine();
 		} catch (IOException e) {
@@ -168,36 +147,21 @@ public class Gui extends Application {
 				}
 			}
 			catch(IOException ex) {
-				ex.printStackTrace();
 				Alert alert = new Alert(AlertType.ERROR);
-				alert.setContentText("poÅ‚Ä…czenie z serwerem zerwane, sprÃ³buj uruchomiÄ‡ aplikacjÄ™ jeszcze raz.");
+				alert.initOwner(primaryStage);
+				alert.setHeaderText(null);
+				alert.setContentText("po³¹czenie z serwerem zerwane, spróbuj uruchomiæ aplikacjê jeszcze raz.");
 				alert.showAndWait();
 				System.exit(1);
 			}
 		}
+		
+		private void addToOnlineUsers(String user) {
+			conversationScene.getActiveUsers().add(user);
+		}
+		
+		private void removeFromOnlineUsers(String user) {
+			conversationScene.getActiveUsers().remove(user);
+		}
 	}
-	
-	
-	
-	private void addToOnlineUsers(String user) {
-		Platform.runLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				conversationScene.getOnlineUsers().getItems().add(user);
-			}
-		});
-	}
-	
-	private void removeFromOnlineUsers(String user) {
-		Platform.runLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				conversationScene.getOnlineUsers().getItems().remove(user);
-			}
-		});
-	}
-	
-	
 }

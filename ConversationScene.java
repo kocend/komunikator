@@ -1,6 +1,6 @@
-package GUI;
+package chatClient;
 
-import javafx.collections.ListChangeListener;
+import java.util.LinkedList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -22,11 +22,12 @@ public class ConversationScene {
 	private Scene conversationScene;
 	private TextField typingField;
 	private TextArea conversationArea;
-	private ListView<String> onlineUsers;
+	private LinkedList<String> activeUsers;
 	
-
 	public ConversationScene(Gui obj) {
+		
 		gui=obj;
+		
 		Text areaLabel = new Text("rozmowa:");
 	    Text onlineLabel = new Text("online:"); 
 	       
@@ -35,41 +36,23 @@ public class ConversationScene {
 	    conversationArea.setWrapText(true);
 	    conversationArea.setEditable(false);
 	    
-	    onlineUsers = new ListView<String>();
+	    activeUsers = new LinkedList<>();
+	    ListView<String> onlineUsers = new ListView<>();
 	    onlineUsers.setPrefSize(20, 300);
-	    onlineUsers.setEditable(false);
-	   
+	    onlineUsers.getItems().addAll(activeUsers);
 	    
 	    
 	    typingField = new TextField();
-	    typingField.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-	    	
-			@Override
-			public void handle(KeyEvent event) {
-				if(event.getCode()==KeyCode.ENTER)
-					gui.sendText();
-			}
-			
-		});
+	    typingField.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event)->{if(event.getCode()==KeyCode.ENTER)gui.sendText();});
 	     
-	    Button sendButton = new Button("wy≈õlij"); 
-	    sendButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-	    	
-			@Override
-			public void handle(MouseEvent event) {
-				gui.sendText();
-			}
-			
-		});
+	    Button sendButton = new Button("wyúlij"); 
+	    sendButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event)->{gui.sendText();});
 	    
-	    GridPane gridPane = new GridPane();    
-	    
-	    gridPane.setPadding(new Insets(10, 10, 10, 10)); 
-	    
-	    gridPane.setVgap(10); 
-        gridPane.setHgap(10);       
-        
-	    gridPane.setAlignment(Pos.CENTER); 
+	    GridPane gridPane = new GridPane();
+	    gridPane.setPadding(new Insets(10, 10, 10, 10));
+	    gridPane.setVgap(10);
+        gridPane.setHgap(10);
+	    gridPane.setAlignment(Pos.CENTER);
 	     
 	    gridPane.add(areaLabel, 0, 0); 
 	    gridPane.add(onlineLabel, 1, 0); 
@@ -96,7 +79,7 @@ public class ConversationScene {
 		return conversationArea;
 	}
 
-	public ListView<String> getOnlineUsers() {
-		return onlineUsers;
+	public LinkedList<String> getActiveUsers() {
+		return activeUsers;
 	}
 }
