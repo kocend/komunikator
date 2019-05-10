@@ -30,7 +30,7 @@ public class Gui extends Application {
 	
 
 	public static void main(String[] args) {
-		serverAddress = "komunikator.zapto.org";
+		serverAddress = "localhost";
 		launch();
 	}
 	
@@ -89,7 +89,7 @@ public class Gui extends Application {
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.initOwner(primaryStage);
 			alert.setHeaderText(null); 
-			alert.setContentText("Nie uda³o siê po³¹czyæ z serwerem, spróbuj ponownie póŸniej."); 
+			alert.setContentText("Nie udaÂ³o siÃª poÂ³Â¹czyÃ¦ z serwerem, sprÃ³buj ponownie pÃ³Å¸niej."); 
 			alert.showAndWait();
 			System.exit(1);
 		}
@@ -150,7 +150,7 @@ public class Gui extends Application {
 				Alert alert = new Alert(AlertType.ERROR);
 				alert.initOwner(primaryStage);
 				alert.setHeaderText(null);
-				alert.setContentText("po³¹czenie z serwerem zerwane, spróbuj uruchomiæ aplikacjê jeszcze raz.");
+				alert.setContentText("poÂ³Â¹czenie z serwerem zerwane, sprÃ³buj uruchomiÃ¦ aplikacjÃª jeszcze raz.");
 				alert.showAndWait();
 				System.exit(1);
 			}
