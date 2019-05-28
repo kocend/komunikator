@@ -33,7 +33,7 @@ public class Serwer {
 			streamsToClients = new LinkedList<>();
 			activeUsersNicks = new LinkedList<>();
 			usersSockets = new LinkedList<>();
-			System.out.println("serwer dzia³a.");
+			System.out.println("serwer dziaÂ³a.");
 			
 			database = new hsqldbDAO();
 			
@@ -115,7 +115,7 @@ public class Serwer {
 					
 					if(clientSocket.isInputShutdown()) {
 						clientSocket.shutdownOutput();
-						System.out.println("klient "+clientSocket.getInetAddress()+" siê od³¹czy³");
+						System.out.println("klient "+clientSocket.getInetAddress()+" siÃª odÂ³Â¹czyÂ³");
 					}
 					streamsToClients.remove(clientSocket.getOutputStream());
 					sendToEveryone("offline/"+nick);
@@ -192,7 +192,7 @@ public class Serwer {
 				}
 				if(clientSocket.isInputShutdown()) {
 					clientSocket.shutdownOutput();
-					System.out.println("klient "+clientSocket.getInetAddress()+" siê od³¹czy³");
+					System.out.println("klient "+clientSocket.getInetAddress()+" siÃª odÂ³Â¹czyÂ³");
 					return false;
 				}
 			}
