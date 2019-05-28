@@ -45,7 +45,7 @@ public class ConversationScene {
 	    typingField = new TextField();
 	    typingField.addEventHandler(KeyEvent.KEY_PRESSED, (KeyEvent event)->{if(event.getCode()==KeyCode.ENTER)gui.sendText();});
 	     
-	    Button sendButton = new Button("wyœlij"); 
+	    Button sendButton = new Button("wyÅ“lij"); 
 	    sendButton.addEventHandler(MouseEvent.MOUSE_CLICKED, (MouseEvent event)->{gui.sendText();});
 	    
 	    GridPane gridPane = new GridPane();
