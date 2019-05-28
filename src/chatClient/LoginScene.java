@@ -33,14 +33,14 @@ public class LoginScene {
 	    errorMessage.setFill(Color.RED);
 	       
 	    TextField loginField = new TextField();   
-	    loginField.setTooltip(new Tooltip("dozwolone znaki: a-z,A-Z,0-9 (bez polskich znaków)"));
+	    loginField.setTooltip(new Tooltip("dozwolone znaki: a-z,A-Z,0-9 (bez polskich znakÃ³w)"));
 	    PasswordField passwordField = new PasswordField();  
 	    passwordField.setTooltip(new Tooltip("zabronione znaki: ' \\ /"));
 	     
 	    Button signInButton = new Button("Sign in"); 
-	    signInButton.setTooltip(new Tooltip("kliknij aby siê zalogowaæ"));
+	    signInButton.setTooltip(new Tooltip("kliknij aby siÃª zalogowaÃ¦"));
 	    Button registerButton = new Button("Register");  
-	    registerButton.setTooltip(new Tooltip("kliknij aby siê zarejestrowaæ"));
+	    registerButton.setTooltip(new Tooltip("kliknij aby siÃª zarejestrowaÃ¦"));
 	    
 	    GridPane typingPane = new GridPane();
 	    typingPane.setPadding(new Insets(10, 10, 10, 10)); 
@@ -115,11 +115,11 @@ public class LoginScene {
 			if(testCorrectnessOfLogin(login)&&testCorrectnessOfPassword(password)) {
 				if(gui.authentication(marker+"/"+login+"/"+password)) {
 					
-					if(marker.equals("r")) alert.setTitle("pomyœlna rejestracja!");
-					else if(marker.equals("l")) alert.setTitle("pomyœlne logowanie!");
+					if(marker.equals("r")) alert.setTitle("pomyÅ“lna rejestracja!");
+					else if(marker.equals("l")) alert.setTitle("pomyÅ“lne logowanie!");
 					
-					if(marker.equals("r")) alert.setContentText("Witaj "+login+" zosta³eœ pomyœlnie zarejestrowany!");
-					else if(marker.equals("l")) alert.setContentText("Witaj "+login+" zosta³eœ pomyœlnie zalogowany!");
+					if(marker.equals("r")) alert.setContentText("Witaj "+login+" zostaÂ³eÅ“ pomyÅ“lnie zarejestrowany!");
+					else if(marker.equals("l")) alert.setContentText("Witaj "+login+" zostaÂ³eÅ“ pomyÅ“lnie zalogowany!");
 					
 					alert.showAndWait();
 					
@@ -127,12 +127,12 @@ public class LoginScene {
 					gui.loggedIn();
 				}
 				else {
-					if(marker.equals("r")) errorMessage.setText("u¿ytkownik ju¿ istnieje."); 
+					if(marker.equals("r")) errorMessage.setText("uÂ¿ytkownik juÂ¿ istnieje."); 
 					else if(marker.equals("l")) errorMessage.setText("niepoprawne dane logowania.");
 				}
 			}
 			else {
-				errorMessage.setText("u¿yto niedozwolonych znaków");
+				errorMessage.setText("uÂ¿yto niedozwolonych znakÃ³w");
 			}
 		}
 	}
