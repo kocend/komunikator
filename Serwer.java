@@ -9,29 +9,35 @@ import java.sql.Statement;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
+
+import Serwer.DAO.DAO;
+import Serwer.DAO.hsqldbDAO;
+
 import java.io.*;
 
 public class Serwer {
 	
-	private static Connection connection;
+	private DAO database;
 	private LinkedList<PrintWriter> streamsToClients;
 	private LinkedList<String> activeUsersNicks;
+	private LinkedList<Socket> usersSockets;
 	
 	public static void main(String [] args) {
 		new Serwer().run();
-		
 	}
 	
 	private void run() {
 		
 		try {
 			ServerSocket serverSocket = new ServerSocket(5437);
-			streamsToClients = new LinkedList<PrintWriter>();
-			activeUsersNicks = new LinkedList<String>();
+			streamsToClients = new LinkedList<>();
+			activeUsersNicks = new LinkedList<>();
+			usersSockets = new LinkedList<>();
 			System.out.println("serwer dzia³a.");
 			
-			Class.forName("org.hsqldb.jdbcDriver");
-			connection = DriverManager.getConnection("jdbc:hsqldb:file:data/komunikator.db","sa","abc123");
+			database = new hsqldbDAO();
+			
+			Runtime.getRuntime().addShutdownHook(new OnExit());
 			
 			while(true) {
 				System.out.println("czekam na klienta...");
@@ -42,29 +48,23 @@ public class Serwer {
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
+		}
+	}
+	
+	private class OnExit extends Thread{
+		@Override
+		public void run() {
+			Iterator<Socket> it = usersSockets.iterator();
+			while(it.hasNext()) {
+				try {
+					it.next().shutdownOutput();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 	}
-	
-	
-	  private synchronized ResultSet queryToBAse(String query) { 
-		 
-		  ResultSet result = null;
-	  
-		  try { 
-			  Statement statement = connection.createStatement();
-			  result = statement.executeQuery(query);
-		  } catch (SQLException e) {
-			  e.printStackTrace(); 
-		  } 
-		  return result;
-	  }
-	 
-
 	
 	private void sendToEveryone(String message) {
 		
@@ -93,6 +93,7 @@ public class Serwer {
 			ID = null;
 			try {
 				clientSocket = socket;
+				usersSockets.add(clientSocket);
 				socketIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			} catch (IOException ex) {
 				ex.printStackTrace();
@@ -107,12 +108,19 @@ public class Serwer {
 					streamsToClients.add(new PrintWriter(clientSocket.getOutputStream()));
 				
 					String message;
-					while(((message = socketIn.readLine())!=null)&&(!clientSocket.isInputShutdown()))
+					while(((message = socketIn.readLine())!=null)&&(!clientSocket.isInputShutdown())) {
 						sendToEveryone("message/"+nick+": " + message);
-				
+						if(message.length()<=500)database.saveMessage(nick, message);
+					}
+					
+					if(clientSocket.isInputShutdown()) {
+						clientSocket.shutdownOutput();
+						System.out.println("klient "+clientSocket.getInetAddress()+" siê od³¹czy³");
+					}
 					streamsToClients.remove(clientSocket.getOutputStream());
 					sendToEveryone("offline/"+nick);
 					activeUsersNicks.remove(nick);
+					usersSockets.remove(clientSocket);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -160,18 +168,17 @@ public class Serwer {
 					Integer id=null;
 					
 					if(marker.equals("r")) {
-						id = SignUp(login, passwd);
+						id = database.SignUp(login, passwd);
 						if(id!=null) {
 							socketOut.println("true");
 							socketOut.flush();
-							//continue;
 							ID=id;
 							break;
 						}
 					}
 					
 					if(marker.equals("l")) {
-						id = SignIn(login, passwd);
+						id = database.SignIn(login, passwd);
 						if(id!=null) {
 							socketOut.println("true");
 							socketOut.flush();
@@ -183,16 +190,35 @@ public class Serwer {
 					socketOut.println("false");
 					socketOut.flush();
 				}
-				if(clientSocket.isInputShutdown()) return false;
+				if(clientSocket.isInputShutdown()) {
+					clientSocket.shutdownOutput();
+					System.out.println("klient "+clientSocket.getInetAddress()+" siê od³¹czy³");
+					return false;
+				}
 			}
 			catch(IOException ex) {
 				ex.printStackTrace();
 			}
 			sendActiveUsers();
+			loadMessages();
 			this.nick = login;
 			return true;
 		}
 		
+		private void loadMessages() {
+			PrintWriter socketOut = null;
+			try {
+				socketOut = new PrintWriter(clientSocket.getOutputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			String messages = database.loadMessages();
+			if(messages.length()!=0) {
+				socketOut.println(messages);
+				socketOut.flush();
+			}
+		}
+
 		private void sendActiveUsers() {
 			try {
 				PrintWriter socketOut = new PrintWriter(clientSocket.getOutputStream());
@@ -207,55 +233,4 @@ public class Serwer {
 			
 		}
 	}
-	
-	private synchronized Integer SignIn(String login, String password) {
-		Integer id = null;
-		String query = "SELECT ID FROM USERS WHERE " 
-						+"nick = '"+login
-						+"' AND "
-						+"passwd = '"+password
-						+"';";
-		ResultSet result = queryToBAse(query);
-		try {
-			while(result.next())
-				id = result.getInt("ID");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return id;
-	}
-	
-	private synchronized Integer SignUp(String login, String password) {
-		Integer id = null;
-		String query = "SELECT ID FROM USERS WHERE "
-						+"nick = '"+login
-						+"';";
-		ResultSet result = queryToBAse(query);
-		try {
-			while(result.next())
-				return null;
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		String addQuery = "INSERT INTO USERS (nick,passwd) VALUES ('"
-							+login
-							+"','"
-							+password
-							+"');";
-		
-		queryToBAse(addQuery);
-		
-		result = queryToBAse(query);
-		
-		try {
-			while(result.next())
-				id=result.getInt("ID");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return id;
-	}
-	
 }
