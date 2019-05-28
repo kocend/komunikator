@@ -30,7 +30,7 @@ public class Gui extends Application {
 
 
     public static void main(String[] args) {
-        serverAddress = "komunikator.zapto.org";
+        serverAddress = "localhost";
         launch();
     }
 
