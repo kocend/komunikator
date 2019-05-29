@@ -122,6 +122,16 @@ public class Serwer {
 					activeUsersNicks.remove(nick);
 					usersSockets.remove(clientSocket);
 				} catch (IOException e) {
+					
+					try {
+						streamsToClients.remove(clientSocket.getOutputStream());
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+					sendToEveryone("offline/"+nick);
+					activeUsersNicks.remove(nick);
+					usersSockets.remove(clientSocket);
+					
 					e.printStackTrace();
 				}
 			}
