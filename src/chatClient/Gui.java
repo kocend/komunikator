@@ -30,7 +30,7 @@ public class Gui extends Application {
 
 
     public static void main(String[] args) {
-        serverAddress = "localhost";
+        serverAddress = "komunikator.zapto.org";
         launch();
     }
 
@@ -39,10 +39,12 @@ public class Gui extends Application {
         configureConnection();
 
         this.primaryStage = stage;
-        primaryStage.setResizable(false);
+        getPrimaryStage().setResizable(false);
 
-        try{primaryStage.getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));}
+        try{
+            getPrimaryStage().getIcons().add(new Image(this.getClass().getResource("icon.png").toString()));}
         catch(Exception ex) {System.out.println("brak icon.png w plikach bin programu");}
+
 
         stage.setOnCloseRequest((WindowEvent event)->{
             try{
@@ -57,18 +59,19 @@ public class Gui extends Application {
 
 
         Scene loginScene = new LoginScene(this).getInstance();
-        primaryStage.setScene(loginScene);
-        primaryStage.show();
+        getPrimaryStage().setScene(loginScene);
+        getPrimaryStage().show();
     }
 
+
     protected void loggedIn() {
-        primaryStage.hide();
+        getPrimaryStage().hide();
 
         conversationScene = new ConversationScene(this);
         Scene convScene = conversationScene.getInstance();
-        primaryStage.setScene(convScene);
+        getPrimaryStage().setScene(convScene);
 
-        primaryStage.show();
+        getPrimaryStage().show();
 
         Thread receiverThread = new Thread(new Receiver());
         receiverThread.start();
@@ -92,7 +95,7 @@ public class Gui extends Application {
         }
         catch(IOException ex) {
             Alert alert = new Alert(AlertType.ERROR);
-            alert.initOwner(primaryStage);
+            alert.initOwner(getPrimaryStage());
             alert.setHeaderText(null);
             alert.setContentText("Nie udało się połączyć z serwerem, spróbuj ponownie później.");
             alert.showAndWait();
@@ -118,13 +121,12 @@ public class Gui extends Application {
     }
 
 
-    public String getUserName() {
-        return userName;
-    }
-
-
     protected void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    protected Stage getPrimaryStage() {
+        return primaryStage;
     }
 
 
@@ -133,16 +135,12 @@ public class Gui extends Application {
             String message;
             try {
                 while(((message = socketIn.readLine())!=null)&&(!socket.isInputShutdown())) {
-                    System.out.println("");
-                    System.out.println(message);
+
                     StringTokenizer str = new StringTokenizer(message);
-                    System.out.println(str.toString());
                     String command = str.nextToken("/");
-                    System.out.println(command);
                     String text = str.nextToken("\n");
-                    System.out.println(text);
                     text=text.substring(1);
-                    System.out.println(text);
+
                     final String finalText = text;
 
                     switch(command) {
@@ -157,47 +155,24 @@ public class Gui extends Application {
             }
             catch(IOException ex) {
                 if(!socket.isInputShutdown()) {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
+                    Platform.runLater(()->{
                             Alert alert = new Alert(AlertType.ERROR);
-                            alert.initOwner(primaryStage);
+                            alert.initOwner(getPrimaryStage());
                             alert.setHeaderText(null);
                             alert.setContentText("połączenie z serwerem zerwane, spróbuj uruchomić aplikację jeszcze raz.");
                             alert.showAndWait();
                             System.exit(1);
-                        }
-                    });
+                        });
                 }
             }
         }
 
-        private void addMessage(final String message){
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    conversationScene.getConversationArea().appendText(message+"\n");
-                }
-            });
-        }
-
+        private void addMessage(final String message){ Platform.runLater(()-> {conversationScene.getConversationArea().appendText(message+"\n");}); }
 
         private void addToOnlineUsers(String user){
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    conversationScene.addUser(user);
-                }
-            });
+            Platform.runLater(() ->{conversationScene.addUser(user);});
         }
 
-        private void removeFromOnlineUsers(String user) {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    conversationScene.removeUser(user);
-                }
-            });
-        }
+        private void removeFromOnlineUsers(String user) { Platform.runLater(() ->{conversationScene.removeUser(user);}); }
     }
 }

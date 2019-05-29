@@ -110,6 +110,7 @@ public class LoginScene {
 
     private void logIn(String marker, String login, String password) {
         Alert alert = new Alert(AlertType.INFORMATION);
+        alert.initOwner(gui.getPrimaryStage());
         alert.setHeaderText(null);
         if(!("".equals(login)&&"".equals(password))){
             if(testCorrectnessOfLogin(login)&&testCorrectnessOfPassword(password)) {
